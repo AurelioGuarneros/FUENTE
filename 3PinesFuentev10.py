@@ -1,5 +1,3 @@
-#con este iniciamos programa que quitara las resistencias termicas 4 de julio
-#pondremos tres semiconductores dos de ellos quitaran las resistencias
 import tkinter as tk
 from tkinter import ttk
 import RPi.GPIO as GPIO
@@ -10,7 +8,7 @@ import threading
 GPIO.setmode(GPIO.BCM)
 
 # Pines GPIO que se utilizarán para PWM
-pwm_pins = [21,20,16]  # son los numero de gpio y los pines son 40,38,36
+pwm_pins = [21, 20, 16]  # Pines GPIO 21, 20, 16 (pines físicos 40, 38, 36)
 
 # Configurar los pines como salida y PWM
 for pin in pwm_pins:
@@ -19,7 +17,7 @@ for pin in pwm_pins:
 
 # Variables globales para frecuencia y ciclo de trabajo
 freq = 1
-duty1 = 50
+duty1 = 25  # Inicializar con un valor menor al 50%
 duty3 = 50
 
 # Bandera para controlar el hilo de PWM
@@ -29,30 +27,33 @@ running = False
 def pwm_thread():
     global running
     period = 1.0 / freq
-    on_time_18 = (duty1 / 100.0) * period
-    off_time_18 = period - on_time_18
-    on_time_24 = (duty3 / 100.0) * period
-    off_time_24 = period - on_time_24
+    max_duty_time = period / 2.0  # Tiempo máximo de duty cycle al 50%
 
     while running:
-        # Pin 18
+        on_time_21 = (duty1 / 50.0) * max_duty_time  # Escala de 0 a 50
+        on_time_20 = max_duty_time - on_time_21  # Complementario de on_time_21
+
+        # Pin 21 y Pin 20 alternados sin superposición
         GPIO.output(pwm_pins[0], GPIO.HIGH)
-        time.sleep(on_time_18)
+        GPIO.output(pwm_pins[1], GPIO.LOW)  # Asegura que el pin 20 está apagado
+        time.sleep(on_time_21)
         GPIO.output(pwm_pins[0], GPIO.LOW)
-        
-        # Pin 23 (inverso de pin 18)
-        GPIO.output(pwm_pins[1], GPIO.LOW)
-        time.sleep(off_time_18)
 
         GPIO.output(pwm_pins[1], GPIO.HIGH)
-        time.sleep(on_time_18)
+        time.sleep(on_time_20)
         GPIO.output(pwm_pins[1], GPIO.LOW)
 
-        # Pin 24
+        # Tiempo muerto entre los cambios para evitar cruces
+        time.sleep(0.00001)
+
+        # Pin 16
+        on_time_16 = (duty3 / 100.0) * period
+        off_time_16 = period - on_time_16
+
         GPIO.output(pwm_pins[2], GPIO.HIGH)
-        time.sleep(on_time_24)
+        time.sleep(on_time_16)
         GPIO.output(pwm_pins[2], GPIO.LOW)
-        time.sleep(off_time_24)
+        time.sleep(off_time_16)
 
 # Función para actualizar PWM
 def update_pwm():
@@ -62,6 +63,12 @@ def update_pwm():
         freq = float(freq_entry.get())
         duty1 = float(duty_entry1.get())
         duty3 = float(duty_entry3.get())
+
+        # Asegurar que el ciclo de trabajo esté entre 0 y 50% para los pines 21 y 20
+        if duty1 > 50:
+            duty1 = 50
+        if duty3 > 100:
+            duty3 = 100
 
         # Detener el hilo anterior si está corriendo
         running = False
@@ -99,10 +106,10 @@ duty_entry3 = tk.StringVar()
 ttk.Label(mainframe, text="Frecuencia (Hz)").grid(column=1, row=1, sticky=tk.W)
 ttk.Entry(mainframe, width=7, textvariable=freq_entry).grid(column=2, row=1, sticky=(tk.W, tk.E))
 
-ttk.Label(mainframe, text="Ciclo de trabajo pin 18 (%)").grid(column=1, row=2, sticky=tk.W)
+ttk.Label(mainframe, text="Ciclo de trabajo pin 21 (%)").grid(column=1, row=2, sticky=tk.W)
 ttk.Entry(mainframe, width=7, textvariable=duty_entry1).grid(column=2, row=2, sticky=(tk.W, tk.E))
 
-ttk.Label(mainframe, text="Ciclo de trabajo pin 24 (%)").grid(column=1, row=3, sticky=tk.W)
+ttk.Label(mainframe, text="Ciclo de trabajo pin 16 (%)").grid(column=1, row=3, sticky=tk.W)
 ttk.Entry(mainframe, width=7, textvariable=duty_entry3).grid(column=2, row=3, sticky=(tk.W, tk.E))
 
 ttk.Button(mainframe, text="Actualizar", command=update_pwm).grid(column=2, row=4, sticky=tk.W)
