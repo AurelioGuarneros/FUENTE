@@ -27,25 +27,27 @@ running = False
 def pwm_thread():
     global running
     period = 1.0 / freq
-    max_duty_time = period / 2.0  # Tiempo máximo de duty cycle al 50%
 
     while running:
-        on_time_21 = (duty1 / 50.0) * max_duty_time  # Escala de 0 a 50
-        on_time_20 = max_duty_time - on_time_21  # Complementario de on_time_21
+        on_time_21 = (duty1 / 100.0) * period
+        off_time_21 = period - on_time_21
+
+        on_time_20 = (100.0 - duty1) / 100.0 * period  # Complementario de on_time_21
+        off_time_20 = period - on_time_20
 
         # Pin 21 y Pin 20 alternados sin superposición
-        GPIO.output(pwm_pins[0], GPIO.HIGH)
-        GPIO.output(pwm_pins[1], GPIO.LOW)  # Asegura que el pin 20 está apagado
-        time.sleep(on_time_21)
+        if duty1 > 0:
+            GPIO.output(pwm_pins[0], GPIO.HIGH)
+            GPIO.output(pwm_pins[1], GPIO.LOW)  # Asegura que el pin 20 está apagado
+            time.sleep(on_time_21)
+
         GPIO.output(pwm_pins[0], GPIO.LOW)
 
-        GPIO.output(pwm_pins[1], GPIO.HIGH)
-        time.sleep(on_time_20)
-        GPIO.output(pwm_pins[1], GPIO.LOW)
-
-        # Tiempo muerto entre los cambios para evitar cruces
-        time.sleep(0.00001)
-
+        if duty1 < 100:
+            GPIO.output(pwm_pins[1], GPIO.HIGH)
+            time.sleep(on_time_20)
+            GPIO.output(pwm_pins[1], GPIO.LOW)
+        
         # Pin 16
         on_time_16 = (duty3 / 100.0) * period
         off_time_16 = period - on_time_16
@@ -64,9 +66,9 @@ def update_pwm():
         duty1 = float(duty_entry1.get())
         duty3 = float(duty_entry3.get())
 
-        # Asegurar que el ciclo de trabajo esté entre 0 y 50% para los pines 21 y 20
-        if duty1 > 50:
-            duty1 = 50
+        # Asegurar que el ciclo de trabajo esté entre 0 y 100%
+        if duty1 > 100:
+            duty1 = 100
         if duty3 > 100:
             duty3 = 100
 
