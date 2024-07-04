@@ -1,4 +1,5 @@
 #con este iniciamos programa que quitara las resistencias termicas 4 de julio
+#pondremos tres semiconductores dos de ellos quitaran las resistencias
 import tkinter as tk
 from tkinter import ttk
 import RPi.GPIO as GPIO
@@ -9,7 +10,7 @@ import threading
 GPIO.setmode(GPIO.BCM)
 
 # Pines GPIO que se utilizarán para PWM
-pwm_pins = [18, 23, 24]  # Cambia estos pines según tu configuración
+pwm_pins = [21,20,16]  # son los numero de gpio y los pines son 40,38,36
 
 # Configurar los pines como salida y PWM
 for pin in pwm_pins:
