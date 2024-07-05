@@ -18,7 +18,6 @@ for pin in pwm_pins:
 # Variables globales para frecuencia y ciclo de trabajo
 freq = 100
 duty1 = 50
-duty3 = 50
 
 # Bandera para controlar el hilo de PWM
 running = False
@@ -27,6 +26,7 @@ running = False
 def pwm_thread():
     global running
     period = 1.0 / freq
+    dead_time = 0.0001  # Tiempo muerto de 100 microsegundos
 
     while running:
         on_time_21 = (duty1 / 100.0) * period
@@ -39,30 +39,24 @@ def pwm_thread():
         time.sleep(on_time_21)
         GPIO.output(pwm_pins[0], GPIO.LOW)
         GPIO.output(pwm_pins[2], GPIO.LOW)
+        time.sleep(dead_time)  # Tiempo muerto
+        
         GPIO.output(pwm_pins[1], GPIO.HIGH)
         time.sleep(off_time_21)
         GPIO.output(pwm_pins[1], GPIO.LOW)
-
-        # Pin 16, siguiendo el mismo comportamiento que el pin 21
-        #GPIO.output(pwm_pins[2], GPIO.HIGH)
-        #time.sleep(on_time_21)
-        #GPIO.output(pwm_pins[2], GPIO.LOW)
-        #time.sleep(off_time_21)
+        time.sleep(dead_time)  # Tiempo muerto
 
 # Función para actualizar PWM
 def update_pwm():
-    global freq, duty1, duty3, running
+    global freq, duty1, running
 
     try:
         freq = float(freq_entry.get())
         duty1 = float(duty_entry1.get())
-        duty3 = float(duty_entry3.get())
 
         # Asegurar que el ciclo de trabajo esté entre 0 y 100%
         if duty1 > 100:
             duty1 = 100
-        if duty3 > 100:
-            duty3 = 100
 
         # Detener el hilo anterior si está corriendo
         running = False
@@ -94,7 +88,6 @@ mainframe.grid(column=0, row=0, sticky=(tk.W, tk.E, tk.N, tk.S))
 # Variables de Tkinter
 freq_entry = tk.StringVar()
 duty_entry1 = tk.StringVar()
-duty_entry3 = tk.StringVar()
 
 # Elementos de la interfaz
 ttk.Label(mainframe, text="Frecuencia (Hz)").grid(column=1, row=1, sticky=tk.W)
@@ -103,11 +96,8 @@ ttk.Entry(mainframe, width=7, textvariable=freq_entry).grid(column=2, row=1, sti
 ttk.Label(mainframe, text="Ciclo de trabajo pin 21 (%)").grid(column=1, row=2, sticky=tk.W)
 ttk.Entry(mainframe, width=7, textvariable=duty_entry1).grid(column=2, row=2, sticky=(tk.W, tk.E))
 
-ttk.Label(mainframe, text="Ciclo de trabajo pin 16 (%)").grid(column=1, row=3, sticky=tk.W)
-ttk.Entry(mainframe, width=7, textvariable=duty_entry3).grid(column=2, row=3, sticky=(tk.W, tk.E))
-
-ttk.Button(mainframe, text="Actualizar", command=update_pwm).grid(column=2, row=4, sticky=tk.W)
-ttk.Button(mainframe, text="Apagar", command=shutdown).grid(column=2, row=5, sticky=tk.W)
+ttk.Button(mainframe, text="Actualizar", command=update_pwm).grid(column=2, row=3, sticky=tk.W)
+ttk.Button(mainframe, text="Apagar", command=shutdown).grid(column=2, row=4, sticky=tk.W)
 
 # Agregar padding a todos los elementos del frame
 for child in mainframe.winfo_children(): 
