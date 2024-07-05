@@ -37,7 +37,7 @@ def pwm_thread():
         GPIO.output(pwm_pins[1], GPIO.LOW)  # Asegura que el pin 20 está apagado
         time.sleep(on_time_21)
         GPIO.output(pwm_pins[0], GPIO.LOW)
-
+        
         GPIO.output(pwm_pins[1], GPIO.HIGH)
         time.sleep(off_time_21)
         GPIO.output(pwm_pins[1], GPIO.LOW)
@@ -117,9 +117,8 @@ for child in mainframe.winfo_children():
 
 # Correr la aplicación de Tkinter
 root.mainloop()
-#aqui le hacemos un cambio
+
 # Limpiar los pines GPIO al cerrar
 for pin in pwm_pins:
     GPIO.output(pin, GPIO.LOW)
 GPIO.cleanup()
-
