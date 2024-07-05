@@ -117,9 +117,9 @@ for child in mainframe.winfo_children():
 
 # Correr la aplicación de Tkinter
 root.mainloop()
-
+#aqui le hacemos un cambio
 # Limpiar los pines GPIO al cerrar
 for pin in pwm_pins:
     GPIO.output(pin, GPIO.LOW)
 GPIO.cleanup()
-#vamos a ver como hace los cambios de lo que se ha hecho
+
