@@ -122,3 +122,4 @@ root.mainloop()
 for pin in pwm_pins:
     GPIO.output(pin, GPIO.LOW)
 GPIO.cleanup()
+#vamos a ver como hace los cambios de lo que se ha hecho
