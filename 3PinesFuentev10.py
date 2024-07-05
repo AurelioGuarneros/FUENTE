@@ -30,16 +30,17 @@ def pwm_thread():
 
     while running:
         on_time_21 = (duty1 / 100.0) * period
-        on_time_20 = period - on_time_21  # Complementario de on_time_21
+        off_time_21 = period - on_time_21
 
-        # Pin 21 y Pin 20 alternados sin superposición
+        # Asegurar que los tiempos de encendido y apagado para ambos pines se calculen correctamente
         GPIO.output(pwm_pins[0], GPIO.HIGH)
-        GPIO.output(pwm_pins[1], GPIO.LOW)  # Asegura que el pin 20 está apagado
+        GPIO.output(pwm_pins[1], GPIO.LOW)
         time.sleep(on_time_21)
-        GPIO.output(pwm_pins[0], GPIO.LOW)
         
+        GPIO.output(pwm_pins[0], GPIO.LOW)
         GPIO.output(pwm_pins[1], GPIO.HIGH)
-        time.sleep(on_time_20)
+        time.sleep(off_time_21)
+        
         GPIO.output(pwm_pins[1], GPIO.LOW)
 
         # Pin 16
