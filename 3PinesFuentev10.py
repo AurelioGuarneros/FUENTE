@@ -16,7 +16,7 @@ for pin in pwm_pins:
     GPIO.output(pin, GPIO.LOW)
 
 # Variables globales para frecuencia y ciclo de trabajo
-freq = 1
+freq = 100
 duty1 = 50
 duty3 = 50
 
@@ -32,25 +32,20 @@ def pwm_thread():
         on_time_21 = (duty1 / 100.0) * period
         off_time_21 = period - on_time_21
 
-        # Asegurar que los tiempos de encendido y apagado para ambos pines se calculen correctamente
+        # Pin 21 y Pin 20 alternados sin superposición
         GPIO.output(pwm_pins[0], GPIO.HIGH)
         GPIO.output(pwm_pins[1], GPIO.LOW)
         time.sleep(on_time_21)
-        
         GPIO.output(pwm_pins[0], GPIO.LOW)
         GPIO.output(pwm_pins[1], GPIO.HIGH)
         time.sleep(off_time_21)
-        
         GPIO.output(pwm_pins[1], GPIO.LOW)
 
-        # Pin 16
-        on_time_16 = (duty3 / 100.0) * period
-        off_time_16 = period - on_time_16
-
+        # Pin 16, siguiendo el mismo comportamiento que el pin 21
         GPIO.output(pwm_pins[2], GPIO.HIGH)
-        time.sleep(on_time_16)
+        time.sleep(on_time_21)
         GPIO.output(pwm_pins[2], GPIO.LOW)
-        time.sleep(off_time_16)
+        time.sleep(off_time_21)
 
 # Función para actualizar PWM
 def update_pwm():
