@@ -34,18 +34,20 @@ def pwm_thread():
 
         # Pin 21 y Pin 20 alternados sin superposición
         GPIO.output(pwm_pins[0], GPIO.HIGH)
+        GPIO.output(pwm_pins[2], GPIO.HIGH)        
         GPIO.output(pwm_pins[1], GPIO.LOW)
         time.sleep(on_time_21)
         GPIO.output(pwm_pins[0], GPIO.LOW)
+        GPIO.output(pwm_pins[2], GPIO.LOW)
         GPIO.output(pwm_pins[1], GPIO.HIGH)
         time.sleep(off_time_21)
         GPIO.output(pwm_pins[1], GPIO.LOW)
 
         # Pin 16, siguiendo el mismo comportamiento que el pin 21
-        GPIO.output(pwm_pins[2], GPIO.HIGH)
-        time.sleep(on_time_21)
-        GPIO.output(pwm_pins[2], GPIO.LOW)
-        time.sleep(off_time_21)
+        #GPIO.output(pwm_pins[2], GPIO.HIGH)
+        #time.sleep(on_time_21)
+        #GPIO.output(pwm_pins[2], GPIO.LOW)
+        #time.sleep(off_time_21)
 
 # Función para actualizar PWM
 def update_pwm():
