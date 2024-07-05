@@ -17,7 +17,7 @@ for pin in pwm_pins:
 
 # Variables globales para frecuencia y ciclo de trabajo
 freq = 1
-duty1 = 25  # Inicializar con un valor menor al 50%
+duty1 = 50
 duty3 = 50
 
 # Bandera para controlar el hilo de PWM
@@ -32,9 +32,6 @@ def pwm_thread():
         on_time_21 = (duty1 / 100.0) * period
         off_time_21 = period - on_time_21
 
-        on_time_20 = (100.0 - duty1) / 100.0 * period  # Complementario de on_time_21
-        off_time_20 = period - on_time_20
-
         # Pin 21 y Pin 20 alternados sin superposición
         GPIO.output(pwm_pins[0], GPIO.HIGH)
         GPIO.output(pwm_pins[1], GPIO.LOW)  # Asegura que el pin 20 está apagado
@@ -42,11 +39,8 @@ def pwm_thread():
         GPIO.output(pwm_pins[0], GPIO.LOW)
 
         GPIO.output(pwm_pins[1], GPIO.HIGH)
-        time.sleep(on_time_20)
+        time.sleep(off_time_21)
         GPIO.output(pwm_pins[1], GPIO.LOW)
-
-        # Tiempo muerto entre los cambios para evitar cruces
-        time.sleep(0.00001)
 
         # Pin 16
         on_time_16 = (duty3 / 100.0) * period
