@@ -36,18 +36,18 @@ def pwm_thread():
         off_time_20 = period - on_time_20
 
         # Pin 21 y Pin 20 alternados sin superposición
-        if duty1 > 0:
-            GPIO.output(pwm_pins[0], GPIO.HIGH)
-            GPIO.output(pwm_pins[1], GPIO.LOW)  # Asegura que el pin 20 está apagado
-            time.sleep(on_time_21)
-
+        GPIO.output(pwm_pins[0], GPIO.HIGH)
+        GPIO.output(pwm_pins[1], GPIO.LOW)  # Asegura que el pin 20 está apagado
+        time.sleep(on_time_21)
         GPIO.output(pwm_pins[0], GPIO.LOW)
 
-        if duty1 < 100:
-            GPIO.output(pwm_pins[1], GPIO.HIGH)
-            time.sleep(on_time_20)
-            GPIO.output(pwm_pins[1], GPIO.LOW)
-        
+        GPIO.output(pwm_pins[1], GPIO.HIGH)
+        time.sleep(on_time_20)
+        GPIO.output(pwm_pins[1], GPIO.LOW)
+
+        # Tiempo muerto entre los cambios para evitar cruces
+        time.sleep(0.00001)
+
         # Pin 16
         on_time_16 = (duty3 / 100.0) * period
         off_time_16 = period - on_time_16
