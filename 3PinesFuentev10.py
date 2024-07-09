@@ -9,11 +9,16 @@ GPIO.setmode(GPIO.BCM)
 
 # Pines GPIO que se utilizarán para PWM
 pwm_pins = [21, 20, 16]  # Pines GPIO 21, 20, 16 (pines físicos 40, 38, 36)
+relay_pin = 26  # Pin GPIO para el relé (pines físicos 11)
 
 # Configurar los pines como salida y PWM
 for pin in pwm_pins:
     GPIO.setup(pin, GPIO.OUT)
     GPIO.output(pin, GPIO.LOW)
+
+# Configurar el pin del relé como salida
+GPIO.setup(relay_pin, GPIO.OUT)
+GPIO.output(relay_pin, GPIO.LOW)
 
 # Variables globales para frecuencia y ciclo de trabajo
 freq = 100
@@ -27,20 +32,18 @@ def pwm_thread():
     global running
     period = 1.0 / freq
     dead_time = 0.0001  # Tiempo muerto de 100 microsegundos
-
     while running:
         on_time_21 = (duty1 / 100.0) * period
         off_time_21 = period - on_time_21
 
         # Pin 21 y Pin 20 alternados sin superposición
         GPIO.output(pwm_pins[0], GPIO.HIGH)
-        GPIO.output(pwm_pins[2], GPIO.HIGH)        
+        GPIO.output(pwm_pins[2], GPIO.HIGH)
         GPIO.output(pwm_pins[1], GPIO.LOW)
         time.sleep(on_time_21)
         GPIO.output(pwm_pins[0], GPIO.LOW)
         GPIO.output(pwm_pins[2], GPIO.LOW)
         time.sleep(dead_time)  # Tiempo muerto
-        
         GPIO.output(pwm_pins[1], GPIO.HIGH)
         time.sleep(off_time_21)
         GPIO.output(pwm_pins[1], GPIO.LOW)
@@ -49,11 +52,9 @@ def pwm_thread():
 # Función para actualizar PWM
 def update_pwm():
     global freq, duty1, running
-
     try:
         freq = float(freq_entry.get())
         duty1 = float(duty_entry1.get())
-
         # Asegurar que el ciclo de trabajo esté entre 0 y 100%
         if duty1 > 100:
             duty1 = 100
@@ -68,6 +69,13 @@ def update_pwm():
     except ValueError:
         pass  # Maneja errores en caso de entrada no válida
 
+# Función para controlar el relé
+def toggle_relay():
+    if GPIO.input(relay_pin) == GPIO.LOW:
+        GPIO.output(relay_pin, GPIO.HIGH)
+    else:
+        GPIO.output(relay_pin, GPIO.LOW)
+
 # Función para apagar PWM y limpiar GPIO
 def shutdown():
     global running
@@ -75,6 +83,7 @@ def shutdown():
     time.sleep(0.1)  # Esperar un momento para asegurar que el hilo se detenga
     for pin in pwm_pins:
         GPIO.output(pin, GPIO.LOW)
+    GPIO.output(relay_pin, GPIO.LOW)
     GPIO.cleanup()
     root.destroy()
 
@@ -98,9 +107,10 @@ ttk.Entry(mainframe, width=7, textvariable=duty_entry1).grid(column=2, row=2, st
 
 ttk.Button(mainframe, text="Actualizar", command=update_pwm).grid(column=2, row=3, sticky=tk.W)
 ttk.Button(mainframe, text="Apagar", command=shutdown).grid(column=2, row=4, sticky=tk.W)
+ttk.Button(mainframe, text="Activar/Desactivar Relé", command=toggle_relay).grid(column=2, row=5, sticky=tk.W)
 
 # Agregar padding a todos los elementos del frame
-for child in mainframe.winfo_children(): 
+for child in mainframe.winfo_children():
     child.grid_configure(padx=5, pady=5)
 
 # Correr la aplicación de Tkinter
@@ -109,4 +119,5 @@ root.mainloop()
 # Limpiar los pines GPIO al cerrar
 for pin in pwm_pins:
     GPIO.output(pin, GPIO.LOW)
+GPIO.output(relay_pin, GPIO.LOW)
 GPIO.cleanup()
