@@ -9,7 +9,7 @@ GPIO.setmode(GPIO.BCM)
 
 # Pines GPIO que se utilizarán para PWM
 pwm_pins = [21, 20, 16]  # Pines GPIO 21, 20, 16 (pines físicos 40, 38, 36)
-relay_pin = 26  # Pin GPIO para el relé (pines físicos 11)
+relay_pin = 17  # Pin GPIO para el relé (pines físicos 11)
 
 # Configurar los pines como salida y PWM
 for pin in pwm_pins:
@@ -73,8 +73,10 @@ def update_pwm():
 def toggle_relay():
     if GPIO.input(relay_pin) == GPIO.LOW:
         GPIO.output(relay_pin, GPIO.HIGH)
+        relay_button.configure(style="On.TButton", text="Relé Encendido")
     else:
         GPIO.output(relay_pin, GPIO.LOW)
+        relay_button.configure(style="Off.TButton", text="Relé Apagado")
 
 # Función para apagar PWM y limpiar GPIO
 def shutdown():
@@ -107,7 +109,16 @@ ttk.Entry(mainframe, width=7, textvariable=duty_entry1).grid(column=2, row=2, st
 
 ttk.Button(mainframe, text="Actualizar", command=update_pwm).grid(column=2, row=3, sticky=tk.W)
 ttk.Button(mainframe, text="Apagar", command=shutdown).grid(column=2, row=4, sticky=tk.W)
-ttk.Button(mainframe, text="Activar/Desactivar Relé", command=toggle_relay).grid(column=2, row=5, sticky=tk.W)
+
+# Estilo de botones
+style = ttk.Style()
+style.configure("On.TButton", background="green")
+style.configure("Off.TButton", background="red")
+
+# Botón para controlar el relé
+relay_button = ttk.Button(mainframe, text="Activar/Desactivar Relé", command=toggle_relay)
+relay_button.grid(column=2, row=5, sticky=tk.W)
+relay_button.configure(style="Off.TButton")  # Estado inicial apagado
 
 # Agregar padding a todos los elementos del frame
 for child in mainframe.winfo_children():
